@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: List
+items:
+
+- kind: ImageStream
+  apiVersion: 'v1'
+  metadata:
+    annotations:
+      description: Spring Boot example
+      tags: java, spring-boot
+    labels:
+      app: spring-boot-java
+    name: spring-boot-java
+
+- kind: BuildConfig
+  apiVersion: 'v1'
+  metadata:
+    labels:
+      app: spring-boot-java
+    name: spring-boot-java
+  spec:
+    
+    runPolicy: 'Serial' 
+    
+    triggers:
+    - github:
+        secret: spring-boot
+      type: GitHub
+    - generic:
+        secret: spring-boot
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+      
+    source:
+      #contextDir: java/mtsj
+      git:
+        uri: https://github.com/redhat-capgemini-exchange/basic-spring-boot.git
+        ref: master
+      type: Git
+    
+    strategy:
+      sourceStrategy:
+        env:
+          - name: MAVEN_MIRROR_URL
+            value: http://nexus.roadtocloudnative.svc:8081/repository/maven-public/
+          #- name: MAVEN_S2I_ARTIFACT_DIRS
+          #  value: server/target
+          #- name: S2I_SOURCE_DEPLOYMENTS_FILTER
+          #  value: '*.war'
+
+        from:
+          kind: ImageStreamTag
+          name: 'java:8'
+          namespace: openshift
+      type: Source
+        
+    output:
+      to:
+        kind: ImageStreamTag
+        name: 'spring-boot-java:latest'
