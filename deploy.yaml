@@ -68,3 +68,16 @@ items:
       deploymentconfig: spring-boot-java
   status:
     loadBalancer: {}
+
+- kind: Route
+  apiVersion: "v1"
+  metadata:
+    name: 'example'
+    annotations:
+      kubernetes.io/tls-acme: "true"
+  spec:
+    to:
+      kind: Service
+      name: 'spring-boot-java'
+    port:
+      targetPort: web
